@@ -49,11 +49,10 @@ A Hugging Face Space for personalized weekly diet and exercise planning, integra
 git clone https://github.com/aditii27/AI_Health_v2.git
 cd AI_Health_v2
 
-text
+
 2. **Install dependencies:**
 pip install -r requirements.txt
 
-text
 3. **Set up environment variables:**  
 Create a `.env` file with your API keys as needed.
 4. **Run the app:**
