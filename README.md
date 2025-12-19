@@ -58,8 +58,6 @@ Create a `.env` file with your API keys as needed.
 4. **Run the app:**
 streamlit run app.py
 
-text
-
 ---
 
 ## 👩‍💻 Team
