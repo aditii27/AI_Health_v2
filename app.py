@@ -2,31 +2,33 @@ import streamlit as st
 from dotenv import load_dotenv
 from langchain_groq import ChatGroq
 import os
-import importlib.util
-import base64
-from PIL import Image
 from datetime import datetime
+import base64
 
 # Load and apply custom CSS
 def load_css():
-    with open('style.css') as f:
-        st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
+    with open("style.css") as f:
+        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
-# Function to add background image
-def add_bg_from_local(image_file):
-    with open(image_file, "rb") as image_file:
-        encoded_string = base64.b64encode(image_file.read())
-    st.markdown(
-        f"""
-        <style>
-        .stApp {{
-            background-image: url(data:image/{"jpg"};base64,{encoded_string.decode()});
-            background-size: cover;
-        }}
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
+# Set background image using base64
+def set_background_image(file_path: str):
+    with open(file_path, "rb") as f:
+        data = base64.b64encode(f.read()).decode()
+    css = f"""
+    <style>
+    [data-testid="stAppViewContainer"] {{
+        background-image: url("data:image/jpg;base64,{data}");
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+    }}
+    </style>
+    """
+    st.markdown(css, unsafe_allow_html=True)
+
+st.set_page_config(page_title="AI Health & Wellness Planner", layout="wide")
+load_css()
+set_background_image("image-3.jpg")   # file is in repo root
 
 # Check if team_info module exists and import it
 try:
@@ -38,8 +40,14 @@ except ImportError:
 # Load environment variables
 load_dotenv()
 
-# Initialize the model (will be done lazily)
-model = None
+# Read key from environment
+groq_api_key = os.getenv("GROQ_API_KEY")
+
+# Initialize Groq model
+model = ChatGroq(
+    model="llama-3.1-8b-instant",
+    groq_api_key=groq_api_key
+)
 
 # Function to calculate daily calorie requirements
 def calculate_calorie_requirements(age, gender, weight, height, fitness_goal):
@@ -57,12 +65,6 @@ def calculate_calorie_requirements(age, gender, weight, height, fitness_goal):
 
 # Function to generate the plan
 def generate_plan_with_prompt(metrics, prompt_template):
-    global model
-    if model is None:
-        try:
-            model = ChatGroq(model="llama3-8b-8192")
-        except Exception as e:
-            raise Exception(f"Failed to initialize AI model. Please check your GROQ_API_KEY in the .env file. Error: {e}")
     prompt = prompt_template.format(**metrics)
     response = model.invoke(prompt)
     return response
@@ -82,7 +84,6 @@ def format_plan(response):
 # Ayurvedic prompt template
 ayurveda_prompt_template = """
 You are a health expert specialized in both modern medicine and Ayurveda. Generate a personalized weekly diet and exercise plan for {name}, a {age}-year-old {gender} with a BMI of {bmi} ({health_status}).
-
 Fitness Goal: {fitness_goal}.
 Daily Calorie Requirement: {daily_calories} kcal.
 Dietary Preference: {dietary_preference}.
@@ -90,7 +91,6 @@ Food Allergies: {food_allergies}.
 Local Cuisine: {local_cuisine}.
 Month: {month}.
 Ayurvedic Consideration: True
-
 Plan should include:
 1. A daily diet plan with meal timings, calorie details, and meal alternatives.
 2. Exercise routines based on goals, incorporating cardio, strength, and flexibility.
@@ -110,9 +110,7 @@ Plan should include:
    - Seasonal herbs and spices for balance.
    - Daily routines (Dinacharya) for optimal health.
    - Natural remedies complementing modern medicine.
-
 Provide a detailed plan for each weekday: Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday.
-
 Return output as:
 Day: {{weekday}}
   - Breakfast: Time, Description, Calories, Ayurvedic Properties
@@ -129,14 +127,12 @@ Day: {{weekday}}
 # Regular prompt template
 regular_prompt_template = """
 You are a health expert. Generate a personalized weekly diet and exercise plan for {name}, a {age}-year-old {gender} with a BMI of {bmi} ({health_status}).
-
 Fitness Goal: {fitness_goal}.
 Daily Calorie Requirement: {daily_calories} kcal.
 Dietary Preference: {dietary_preference}.
 Food Allergies: {food_allergies}.
 Local Cuisine: {local_cuisine}.
 Month: {month}.
-
 Plan should include:
 1. A daily diet plan with meal timings, calorie details, and meal alternatives.
 2. Exercise routines based on goals, incorporating cardio, strength, and flexibility.
@@ -150,9 +146,7 @@ Plan should include:
    - Multi-restaurant meal aggregation for complete diet fulfillment.
    - Location-based meal recommendations.
    - Customizable meal delivery schedules.
-
 Provide a detailed plan for each weekday: Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday.
-
 Return output as:
 Day: {{weekday}}
   - Breakfast: Time, Description, Calories
@@ -165,14 +159,7 @@ Day: {{weekday}}
   - Food Delivery: Suggested meal items and delivery options.
 """
 
-# Streamlit app
-st.set_page_config(page_title="AI Health & Wellness Planner", layout="wide")
-load_css()
-
-# Add the meditation background image
-add_bg_from_local('images/image-3.jpg')
-
-# Create two columns for the header
+# Header
 col1, col2 = st.columns([2, 1])
 
 with col1:
@@ -183,34 +170,32 @@ with col1:
     </div>
     """, unsafe_allow_html=True)
 
-
 with col2:
-    # Display the spices image
-    st.image('images/Image-1.jpg', caption='Natural ingredients for holistic wellness', use_container_width=True)
+    st.image('Image-1.jpg', caption='Natural ingredients for holistic wellness', use_container_width=True)
 
-# Add sidebar with team information
+# Sidebar
 with st.sidebar:
     st.markdown("<div class='sidebar-content'>", unsafe_allow_html=True)
     st.header("✨ About this Project")
     st.write("Integration of Ayurveda and modern medical science for comprehensive wellness insights")
-    
+
     if has_team_info:
         st.subheader("👥 Team Members")
         st.markdown("- Aditi Soni [LinkedIn](https://www.linkedin.com/in/aditi-soni-259813285/)")
         st.markdown("- Bhumika Patel [LinkedIn](https://www.linkedin.com/in/bhumika-patel-ml/)")
         st.markdown("- Aditi Lakhera [LinkedIn](https://www.linkedin.com/in/aditi-lakhera-b628802bb/)")
         st.markdown("- Anushri Tiwari [LinkedIn](https://www.linkedin.com/in/anushri-tiwari-916494300 )")
-        
+
         st.subheader("🔗 Project Links")
-        st.markdown("[GitHub Repository](https://github.com/Abs6187/AI_Health_v2)")
-        st.markdown("[Presentation](https://github.com/Abs6187/AI_Health_v2/blob/main/HackGirl_PPT_HackSRIT.pptx)")
+        st.markdown("[GitHub Repository](https://github.com/aditii27/AI_Health_v2)")
+        st.markdown("[Presentation](https://github.com/aditii27/AI_Health_v2/blob/main/HackGirl_PPT_HackSRIT.pptx)")
         st.markdown("[Hackathon](https://unstop.com/hackathons/hacksrit-shri-ram-group-of-institutions-jabalpur-1471613)")
     st.markdown("</div>", unsafe_allow_html=True)
 
-# Main content
+# Main content container
 st.markdown("<div class='main-content'>", unsafe_allow_html=True)
 
-# Create three columns for input fields
+# Input columns
 col1, col2, col3 = st.columns(3)
 
 with col1:
@@ -236,15 +221,17 @@ st.subheader("🌿 Wellness Preferences")
 col1, col2 = st.columns(2)
 
 with col1:
-    month = st.selectbox("Select Month", options=["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"])
+    month = st.selectbox("Select Month", options=[
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+    ])
     include_ayurveda = st.checkbox("Include Ayurvedic wellness insights", value=True)
 
-# Calculate and display metrics
+# Metrics
 bmi = round(weight / (height / 100) ** 2, 2)
 health_status = "Underweight" if bmi < 18.5 else "Normal weight" if bmi <= 24.9 else "Overweight"
 daily_calories = calculate_calorie_requirements(age, gender, weight, height, fitness_goal)
 
-# Display metrics in a nice format
 st.markdown("""
 <div class='metric-container'>
     <h3>Your Health Metrics</h3>
@@ -253,7 +240,7 @@ st.markdown("""
 </div>
 """.format(bmi, health_status, int(daily_calories)), unsafe_allow_html=True)
 
-# User metrics
+# Metrics dict
 metrics = {
     "name": name,
     "age": age,
@@ -269,29 +256,25 @@ metrics = {
     "month": month,
 }
 
-# Generate and display plan
+# Generate plan
 if st.button("Generate Personalized Plan"):
     with st.spinner("🌟 Creating your personalized wellness journey..."):
         try:
-            # Choose the appropriate prompt based on the Ayurveda option
             selected_prompt = ayurveda_prompt_template if include_ayurveda else regular_prompt_template
             plan = generate_plan_with_prompt(metrics, selected_prompt)
             formatted_plan = format_plan(plan)
-            
+
             plan_title = "🌺 Integrated Ayurvedic & Modern Wellness Plan" if include_ayurveda else "💪 Personalized Health Plan"
             st.header(f"{plan_title} for {month}")
             st.markdown(formatted_plan)
-            
-            # Create download button for the plan
+
             current_date = datetime.now().strftime("%Y%m%d")
             filename = f"wellness_plan_{name.replace(' ', '_')}_{current_date}.txt"
-            
-            # Prepare the content for the text file
+
             plan_content = f"""
 {plan_title} for {month}
 Generated for: {name}
 Date: {datetime.now().strftime('%Y-%m-%d')}
-
 Personal Details:
 ---------------
 Age: {age}
@@ -300,19 +283,15 @@ Weight: {weight} kg
 Height: {height} cm
 BMI: {bmi:.1f} ({health_status})
 Daily Calorie Target: {int(daily_calories)} kcal
-
 Preferences:
 -----------
 Fitness Goal: {fitness_goal}
 Dietary Preference: {dietary_preference}
 Food Allergies: {food_allergies if food_allergies else 'None'}
 Local Cuisine: {local_cuisine}
-
 {formatted_plan}
-
 Generated by AI Health & Wellness Planner
 """
-            # Create a download button
             st.download_button(
                 label="📥 Download Plan as Text File",
                 data=plan_content,
@@ -321,11 +300,8 @@ Generated by AI Health & Wellness Planner
                 help="Click to download your personalized wellness plan",
                 key="download_plan"
             )
-            
-            # Add a divider
+
             st.markdown("---")
-            
-            # Add some helpful tips
             st.markdown("""
             ### 📋 Tips for Using Your Plan:
             1. Save your plan for offline reference
@@ -333,16 +309,14 @@ Generated by AI Health & Wellness Planner
             3. Track your progress daily
             4. Adjust the plan as needed based on your progress
             """)
-            
+
         except Exception as e:
             st.error(f"Error generating the plan: {e}")
 
 st.markdown("</div>", unsafe_allow_html=True)
 
-# Footer
 st.markdown("""
 <div style='text-align: center; padding: 20px; color: #666;'>
     Made with ❤️ for better health and wellness
 </div>
 """, unsafe_allow_html=True)
-
