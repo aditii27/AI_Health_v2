@@ -2,7 +2,7 @@
 
 A Hugging Face Space for personalized weekly diet and exercise planning, integrating modern medical science and Ayurveda for holistic wellness.
 
-[Visit Project on Hugging Face](https://huggingface.co/spaces/Abs6187/AI_Health_v2)
+[Visit Project on Hugging Face](https://huggingface.co/spaces/aditii27/AI_health)
 
 ---
 
@@ -20,16 +20,16 @@ A Hugging Face Space for personalized weekly diet and exercise planning, integra
 ## 🖼️ Screenshots
 
 **Main Interface**  
-![Main UI](project_screenshot1.png)
+![Main UI](images/project_screenshot1.png)
 
 **Plan Example**  
-![Plan Example](project_screenshot2.png)
+![Plan Example](images/project_screenshot2.png)
 
 **Food Delivery Integration**  
-![Food Delivery](project_screenshot3.png)
+![Food Delivery](images/project_screenshot3.png)
 
 **Future Implementation**  
-![Future](Future_Implementation.png)
+![Future](images/Future_Implementation.png)
 
 
 ---
@@ -46,7 +46,7 @@ A Hugging Face Space for personalized weekly diet and exercise planning, integra
 ## 🛠️ Getting Started
 
 1. **Clone the repository:**
-git clone https://github.com/Abs6187/AI_Health_v2.git
+git clone https://github.com/aditii27/AI_Health_v2.git
 cd AI_Health_v2
 
 text
@@ -74,8 +74,8 @@ text
 
 ## 📚 Project Links
 
-- [GitHub Repository](https://github.com/Abs6187/AI_Health_v2)
-- [Presentation](https://github.com/Abs6187/AI_Health_v2/blob/main/HackGirl_PPT_HackSRIT.pptx)
+- [GitHub Repository](https://github.com/aditii27/AI_Health_v2)
+- [Presentation](https://github.com/aditii27/AI_Health_v2/blob/main/HackGirl_PPT_HackSRIT.pptx)
 - [HackSRIT Hackathon](https://unstop.com/hackathons/hacksrit-shri-ram-group-of-institutions-jabalpur-1471613)
 
 ---
